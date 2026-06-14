@@ -3,9 +3,17 @@ services:
     container_name: immich_server
     image: ghcr.io/immich-app/immich-server@sha256:c15bff75068effb03f4355997d03dc7e0fc58720c2b54ad6f7f10d1bc57efaa5
     environment:
+      IMMICH_CONFIG_FILE: /usr/src/app/config/immich-config.json
       IMMICH_TELEMETRY_INCLUDE: all
+#      IMMICH_ALLOW_SETUP: false
+      IMMICH_OIDC_ISSUER_URL: http://localhost:8080/auth/realms/selfHosting
+      IMMICH_OIDC_BUTTON_TEXT: "Login with Keycloak"
+    extra_hosts:
+      - "localhost:host-gateway"
     volumes:
       - upload-data:/data
+      - ./immich/immich-config.json:/usr/src/app/config/immich-config.json
+
     ports:
       - "2283:2283"
       - "8081:8081"
@@ -13,6 +21,7 @@ services:
     depends_on:
       - redis
       - database
+      - keycloak
     restart: always
 
   immich-machine-learning:
@@ -85,25 +94,25 @@ services:
       - grafana-data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
       - ./grafana/dashboards:/var/lib/grafana/dashboards
-#  keycloak:
-#    image: quay.io/keycloak/keycloak:26.0.7
-#    container_name: portal_keycloak
-#    restart: unless-stopped
-#    environment:
-#      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
-#      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-admin}
-#    ports:
-#      - "8080:8080"
-#    command:
-#      - "start-dev"
-#      - "--import-realm"
-#      - "--spi-theme-static-max-age=0"
-#    networks:
-#      - default
-#      - monitoring
-#    volumes:
-#      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
-#      - ./keycloak-themes:/opt/keycloak/themes
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0.7
+    container_name: keycloak
+    restart: unless-stopped
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-admin}
+      KC_HTTP_RELATIVE_PATH: /auth
+    ports:
+      - "8080:8080"
+    command:
+      - "start-dev"
+      - "--import-realm"
+      - "--spi-theme-static-max-age=0"
+      - "--http-enabled=true"
+      - "--hostname-strict=false"
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
+      - ./keycloak-themes:/opt/keycloak/themes
 
 volumes:
   upload-data:
