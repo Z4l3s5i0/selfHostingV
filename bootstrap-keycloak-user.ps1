@@ -2,7 +2,7 @@
 $KC_CONTAINER = "keycloak"
 $REALM = "selfHosting"
 $CLIENT_NAME = "immich"
-$USERNAME = "admin_user"
+$USERNAME = "Admin"
 $EMAIL = "admin@admin.ch"
 
 Write-Host "`n--- Bootstrapping Keycloak User ---" -ForegroundColor Cyan

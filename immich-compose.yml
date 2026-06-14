@@ -5,7 +5,7 @@ services:
     environment:
       IMMICH_CONFIG_FILE: /usr/src/app/config/immich-config.json
       IMMICH_TELEMETRY_INCLUDE: all
-#      IMMICH_ALLOW_SETUP: false
+      IMMICH_ALLOW_SETUP: false
       IMMICH_OIDC_ISSUER_URL: http://localhost:8080/auth/realms/selfHosting
       IMMICH_OIDC_BUTTON_TEXT: "Login with Keycloak"
     extra_hosts:
@@ -113,7 +113,6 @@ services:
     volumes:
       - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
       - ./keycloak-themes:/opt/keycloak/themes
-
 volumes:
   upload-data:
   model-cache:
