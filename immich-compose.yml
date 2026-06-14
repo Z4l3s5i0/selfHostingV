@@ -1,0 +1,113 @@
+services:
+  immich-server:
+    container_name: immich_server
+    image: ghcr.io/immich-app/immich-server@sha256:c15bff75068effb03f4355997d03dc7e0fc58720c2b54ad6f7f10d1bc57efaa5
+    environment:
+      IMMICH_TELEMETRY_INCLUDE: all
+    volumes:
+      - upload-data:/data
+    ports:
+      - "2283:2283"
+      - "8081:8081"
+      - "8082:8082"
+    depends_on:
+      - redis
+      - database
+    restart: always
+
+  immich-machine-learning:
+    container_name: immich_machine_learning
+    image: ghcr.io/immich-app/immich-machine-learning@sha256:a2501141440f10516d329fdfba2c68082e19eb9ba6016c061ac80d23beadf7f3
+    volumes:
+      - model-cache:/cache
+    restart: always
+
+  redis:
+    container_name: immich_redis
+    image: docker.io/valkey/valkey@sha256:8436e10bc65c94886a91d4415b6a6dfa9cb5a306fb3b996e5bb67cd2b4854193
+    healthcheck:
+      test: redis-cli ping || exit 1
+    ports:
+      - "6379:6379"
+    restart: always
+
+  database:
+    container_name: immich_postgres
+    image: ghcr.io/immich-app/postgres@sha256:bcf63357191b76a916ae5eb93464d65c07511da41e3bf7a8416db519b40b1c23
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_DB: ${DB_DATABASE_NAME}
+      POSTGRES_INITDB_ARGS: "--data-checksums"
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    restart: always
+  immich-prometheus:
+    container_name: immich_prometheus
+    ports:
+      # this exposes the default port for Prometheus so you can interact with it
+      - 9090:9090
+    image: prom/prometheus
+    volumes:
+      # the Prometheus configuration file - a barebones one is provided to get started
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      # a named volume defined in the bottom of the Compose file; it can also be a mounted folder
+      - prometheus-data:/prometheus
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+    ports:
+      - "9100:9100"
+    restart: always
+  immich-grafana:
+    container_name: immich_grafana
+    command: [ './run.sh', '-disable-reporting' ] # this is to disable Grafana's telemetry
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+      - GF_AUTH_ANONYMOUS_ORG_NAME=Main Org.
+    ports:
+      - 3001:3000
+    image: grafana/grafana
+    volumes:
+      # stores your pretty dashboards and panels
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+#  keycloak:
+#    image: quay.io/keycloak/keycloak:26.0.7
+#    container_name: portal_keycloak
+#    restart: unless-stopped
+#    environment:
+#      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
+#      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-admin}
+#    ports:
+#      - "8080:8080"
+#    command:
+#      - "start-dev"
+#      - "--import-realm"
+#      - "--spi-theme-static-max-age=0"
+#    networks:
+#      - default
+#      - monitoring
+#    volumes:
+#      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
+#      - ./keycloak-themes:/opt/keycloak/themes
+
+volumes:
+  upload-data:
+  model-cache:
+  db-data:
+  prometheus-data:
+  grafana-data:

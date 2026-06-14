@@ -1,0 +1,6 @@
+[API metrics of immich](http://localhost:8081/metrics)
+[Microservice metrics of immich](http://localhost:8082/metrics)
+[prometheus](http://localhost:9090/metrics)
+[node exporter](http://localhost:9100/metrics)
+[grafana](http://localhost:3001)
+[member dashboard](http://localhost:3001/d/member_dashboard)
