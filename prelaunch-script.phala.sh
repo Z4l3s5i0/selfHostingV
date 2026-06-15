@@ -318,21 +318,23 @@ fi
 #
 # Generate certificates for Keycloak
 #
-echo "Generating certificates for Keycloak..."
-mkdir -p certs
-if [[ -n "$DSTACK_APP_DOMAIN" ]]; then
-    CERT_DOMAIN="$DSTACK_APP_DOMAIN"
+if [[ -n "$DSTACK_APP_DOMAIN" ]] && [[ ${#DSTACK_APP_DOMAIN} -le 64 ]]; then
+    echo "Generating certificates for Keycloak..."
+    mkdir -p certs
+    if [[ ! -f "certs/server.crt" ]]; then
+        openssl req -x509 -newkey rsa:4096 -nodes -sha256 -keyout certs/server.key -out certs/server.crt -subj "/CN=$DSTACK_APP_DOMAIN" -days 365
+        echo "Certificates generated for $DSTACK_APP_DOMAIN"
+    else
+        echo "Certificates already exist, skipping generation"
+    fi
+    chmod 644 certs/server.key certs/server.crt
 else
-    CERT_DOMAIN="localhost"
+    if [[ ${#DSTACK_APP_DOMAIN} -gt 64 ]]; then
+        echo "Skipping certificate generation: domain name too long for CN (${#DSTACK_APP_DOMAIN} characters)"
+    else
+        echo "Skipping certificate generation: DSTACK_APP_DOMAIN not set"
+    fi
 fi
-
-if [[ ! -f "certs/server.crt" ]]; then
-    openssl req -x509 -newkey rsa:4096 -nodes -sha256 -keyout certs/server.key -out certs/server.crt -subj "/CN=$CERT_DOMAIN" -days 365
-    echo "Certificates generated for $CERT_DOMAIN"
-else
-    echo "Certificates already exist, skipping generation"
-fi
-chmod 644 certs/server.key certs/server.crt
 
 echo "----------------------------------------------"
 echo "Script execution completed"

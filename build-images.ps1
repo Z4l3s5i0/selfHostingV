@@ -1,0 +1,64 @@
+# Build and Push Script for Phala Cloud Deployment
+# This script builds custom Docker images with baked-in configurations
+# and pushes them to your registry.
+
+param (
+    [Parameter(Mandatory=$true)]
+    [string]$Registry, # e.g., "myregistry.azurecr.io" or "ghcr.io/myuser"
+
+    [switch]$Push = $true
+)
+
+$Images = @(
+    @{ Name = "prometheus-custom"; Path = "docker/prometheus" },
+    @{ Name = "grafana-custom"; Path = "docker/grafana" },
+    @{ Name = "keycloak-custom"; Path = "docker/keycloak" },
+    @{ Name = "immich-server-custom"; Path = "docker/immich-server" }
+)
+
+foreach ($Img in $Images) {
+    $FullTag = "$Registry/$($Img.Name):latest"
+    Write-Host "Building $FullTag..." -ForegroundColor Cyan
+    
+    # Check if we need to copy context files
+    if ($Img.Name -eq "prometheus-custom") {
+        Copy-Item prometheus.yml "$($Img.Path)/prometheus.yml" -Force
+    } elseif ($Img.Name -eq "grafana-custom") {
+        if (-Not (Test-Path "$($Img.Path)/grafana")) { New-Item -ItemType Directory -Path "$($Img.Path)/grafana" }
+        Copy-Item grafana/provisioning "$($Img.Path)/grafana/" -Recurse -Force
+        Copy-Item grafana/dashboards "$($Img.Path)/grafana/" -Recurse -Force
+    } elseif ($Img.Name -eq "keycloak-custom") {
+        if (-Not (Test-Path "$($Img.Path)/keycloak")) { New-Item -ItemType Directory -Path "$($Img.Path)/keycloak" }
+        Copy-Item keycloak/realm-export.json "$($Img.Path)/keycloak/realm-export.json" -Force
+        # Copy-Item certs "$($Img.Path)/certs" -Recurse -Force # Uncomment if needed
+    } elseif ($Img.Name -eq "immich-server-custom") {
+        if (-Not (Test-Path "$($Img.Path)/immich")) { New-Item -ItemType Directory -Path "$($Img.Path)/immich" }
+        Copy-Item immich/immich-config.json "$($Img.Path)/immich/immich-config.json" -Force
+    }
+
+    docker build -t $FullTag $Img.Path
+    
+    if ($Push) {
+        Write-Host "Pushing $FullTag..." -ForegroundColor Cyan
+        docker push $FullTag
+        if ($LASTEXITCODE -ne 0) {
+            Write-Error "Failed to push $FullTag. Ensure you are logged in (docker login) and have permission."
+            
+            # Diagnostic help
+            if ($Registry -notlike "*.*" -and $Registry -notlike "*/*") {
+                Write-Host "ERROR: Registry '$Registry' seems to be missing a hostname." -ForegroundColor Red
+                Write-Host "TIP: If you are using Docker Hub, use 'docker.io/$Registry' as your registry." -ForegroundColor Yellow
+            }
+            
+            if ($Registry -like "ghcr.io*") {
+                Write-Host "TIP: For GitHub Container Registry (ghcr.io), ensure your Personal Access Token (PAT) has the 'write:packages' scope." -ForegroundColor Yellow
+                Write-Host "     If the repository is private, you may also need to grant the PAT permission to that specific repository." -ForegroundColor Yellow
+            } elseif ($Registry -like "*azurecr.io*") {
+                Write-Host "TIP: For Azure Container Registry, ensure you have the 'AcrPush' role or equivalent permissions." -ForegroundColor Yellow
+            }
+            exit 1
+        }
+    }
+}
+
+Write-Host "All images processed!" -ForegroundColor Green

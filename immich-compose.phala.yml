@@ -1,12 +1,17 @@
 services:
   immich-server:
     container_name: immich_server
-    image: ghcr.io/immich-app/immich-server@sha256:c15bff75068effb03f4355997d03dc7e0fc58720c2b54ad6f7f10d1bc57efaa5
+    image: ${DOCKER_REGISTRY}/immich-server-custom:latest
     environment:
       IMMICH_TELEMETRY_INCLUDE: all
       IMMICH_ALLOW_SETUP: true
-      IMMICH_OIDC_ISSUER_URL: http://keycloak:8080/auth/realms/selfHosting
+      # For Phala Cloud, this should ideally be the public URL so the browser can reach it.
+      # e.g., https://<app-id>-8080.dstack-pha-prod5.phala.network/auth/realms/selfHosting
+      # If you leave it as internal http://keycloak:8080, OIDC login from the browser will fail.
+      IMMICH_OIDC_ISSUER_URL: ${IMMICH_OIDC_ISSUER_URL:-http://keycloak:8080/auth/realms/selfHosting}
       IMMICH_OIDC_BUTTON_TEXT: "Login with Keycloak"
+      # Phala Cloud environment variables
+      DOCKER_REGISTRY: ${DOCKER_REGISTRY}
     extra_hosts:
       - "localhost:host-gateway"
     volumes:
@@ -50,45 +55,6 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
     restart: always
-  bootstrap:
-    image: alpine
-    command: >
-      sh -c "
-      mkdir -p /shared &&
-      echo 'global:' > /shared/prometheus.yml &&
-      echo '  scrape_interval: 5s' >> /shared/prometheus.yml &&
-      echo '' >> /shared/prometheus.yml &&
-      echo 'scrape_configs:' >> /shared/prometheus.yml &&
-      echo '  - job_name: node_exporter' >> /shared/prometheus.yml &&
-      echo '    static_configs:' >> /shared/prometheus.yml &&
-      echo '      - targets: [\"node-exporter:9100\"]' >> /shared/prometheus.yml &&
-      echo '' >> /shared/prometheus.yml &&
-      echo '  - job_name: immich_api' >> /shared/prometheus.yml &&
-      echo '    static_configs:' >> /shared/prometheus.yml &&
-      echo '      - targets: [\"immich-server:8081\"]' >> /shared/prometheus.yml &&
-      echo '' >> /shared/prometheus.yml &&
-      echo '  - job_name: immich_microservices' >> /shared/prometheus.yml &&
-      echo '    static_configs:' >> /shared/prometheus.yml &&
-      echo '      - targets: [\"immich-server:8082\"]' >> /shared/prometheus.yml
-      "
-    volumes:
-      - prometheus-config:/shared
-  immich-prometheus:
-    container_name: immich_prometheus
-    ports:
-      # this exposes the default port for Prometheus so you can interact with it
-      - "9090:9090"
-    image: prom/prometheus
-    depends_on:
-      - node-exporter
-      - immich-server
-      - bootstrap
-    volumes:
-      # the Prometheus configuration file - a barebones one is provided to get started
-      - prometheus-config:/etc/prometheus      # a named volume defined in the bottom of the Compose file; it can also be a mounted folder
-      - prometheus-data:/prometheus
-    command:
-      - "--config.file=/etc/prometheus/prometheus.yml"
   node-exporter:
     image: prom/node-exporter:latest
     container_name: node-exporter
@@ -104,6 +70,19 @@ services:
     ports:
       - "9100:9100"
     restart: always
+  immich-prometheus:
+    container_name: immich_prometheus
+    ports:
+      # this exposes the default port for Prometheus so you can interact with it
+      - "9090:9090"
+    image: ${DOCKER_REGISTRY}/prometheus-custom:latest
+    depends_on:
+      - node-exporter
+      - immich-server
+    volumes:
+      - prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
   immich-grafana:
     container_name: immich_grafana
     command: [ './run.sh', '-disable-reporting' ] # this is to disable Grafana's telemetry
@@ -113,43 +92,37 @@ services:
       - GF_AUTH_ANONYMOUS_ORG_NAME=Main Org.
     ports:
       - 3001:3000
-    image: grafana/grafana
+    image: ${DOCKER_REGISTRY}/grafana-custom:latest
     volumes:
       # stores your pretty dashboards and panels
       - grafana-data:/var/lib/grafana
-      - ./grafana/provisioning:/etc/grafana/provisioning
-      - ./grafana/dashboards:/var/lib/grafana/dashboards
   keycloak:
-    image: quay.io/keycloak/keycloak:26.0.7
+    image: ${DOCKER_REGISTRY}/keycloak-custom:latest
     container_name: keycloak
     restart: unless-stopped
     environment:
       KC_PROXY_HEADERS: xforwarded
-      KC_PROXY: edge
       KC_HOSTNAME_STRICT: "false"
       KC_HOSTNAME_STRICT_HTTPS: "false"
-      KC_HOSTNAME: 67c74a88741794dcf90a195b899f734fb9ca383d-8080.dstack-pha-prod9.phala.network
       KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME_DEBUG: "true"
+      KC_LOG_LEVEL: "INFO"
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-admin}
       KC_HTTP_RELATIVE_PATH: /auth
     ports:
       - "8080:8080"
-      - "8443:8443"
-    volumes:
-      - ./certs/server.crt:/opt/keycloak/conf/server.crt.pem
-      - ./certs/server.key:/opt/keycloak/conf/server.key.pem
     command:
       - "start-dev"
       - "--spi-theme-static-max-age=0"
-      - "--hostname-strict=false"
       - "--http-relative-path=/auth"
-      - "--https-certificate-key-file=/opt/keycloak/conf/server.key.pem"
-      - "--https-certificate-file=/opt/keycloak/conf/server.crt.pem"
+      - "--import-realm"
+      - "--http-enabled=true"
+      - "--hostname-debug=true"
+      - "--hostname-strict=false"
 volumes:
   upload-data:
   model-cache:
   db-data:
   prometheus-data:
-  prometheus-config:
   grafana-data:
