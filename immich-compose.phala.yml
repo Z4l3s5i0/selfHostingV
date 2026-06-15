@@ -101,15 +101,16 @@ services:
     container_name: keycloak
     restart: unless-stopped
     environment:
-      KC_PROXY_HEADERS: xforwarded
       KC_HOSTNAME_STRICT: "false"
-      KC_HOSTNAME_STRICT_HTTPS: "false"
       KC_HTTP_ENABLED: "true"
       KC_HOSTNAME_DEBUG: "true"
       KC_LOG_LEVEL: "INFO"
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-admin}
       KC_HTTP_RELATIVE_PATH: /auth
+      KC_HOSTNAME: ${DSTACK_APP_DOMAIN:-localhost}
+      KC_PROXY_HEADERS: xforwarded
+      KC_HOSTNAME_ADMIN_URL: https://${DSTACK_APP_DOMAIN:-localhost}/auth
     ports:
       - "8080:8080"
     command:
@@ -119,7 +120,10 @@ services:
       - "--import-realm"
       - "--http-enabled=true"
       - "--hostname-debug=true"
-      - "--hostname-strict=false"
+      - "--hostname=${DSTACK_APP_DOMAIN:-localhost}"
+      - "--proxy-headers=xforwarded"
+      - "--hostname-admin-url=https://${DSTACK_APP_DOMAIN:-localhost}/auth"
+#      - "--proxy-protocol-enabled"
 volumes:
   upload-data:
   model-cache:

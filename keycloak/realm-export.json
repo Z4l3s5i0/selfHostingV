@@ -729,14 +729,11 @@
       "clientAuthenticatorType": "client-secret",
       "secret": "IZrJX5piAh9Evlw8jogpNZDFdVX0s12T",
       "redirectUris": [
-        "http://keycloak:2283/*",
-        "/*",
-        "http://localhost:2283/*",
-        "http://localhost:2283/auth/login",
-        "http://keycloak:2283/auth/login"
+        "https://*",
+        "/*"
       ],
       "webOrigins": [
-        "http://localhost:2283"
+        "*"
       ],
       "notBefore": 0,
       "bearerOnly": false,
@@ -1608,7 +1605,7 @@
     "referrerPolicy": "no-referrer",
     "xRobotsTag": "none",
     "xFrameOptions": "SAMEORIGIN",
-    "contentSecurityPolicy": "frame-src 'self'; frame-ancestors 'self'; object-src 'none';",
+    "contentSecurityPolicy": "frame-src 'self' https:; frame-ancestors 'self' https:; object-src 'none'; upgrade-insecure-requests; block-all-mixed-content;",
     "xXSSProtection": "1; mode=block",
     "strictTransportSecurity": "max-age=31536000; includeSubDomains"
   },
