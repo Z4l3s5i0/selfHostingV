@@ -90,9 +90,9 @@ If Keycloak redirects you to an internal address (like `http://keycloak/...`), e
 
 **Important for OIDC Login**:
 To make "Login with Keycloak" work in Immich, you must set the `IMMICH_OIDC_ISSUER_URL` in your `.env` file to the **public** URL of your Keycloak instance.
-1. Find your Keycloak URL (it usually ends in `-8080.dstack...`).
+1. Find your Keycloak URL (it usually ends in `-8443.dstack...`).
 2. Add the following to your `.env`:
    ```
-   IMMICH_OIDC_ISSUER_URL=https://<your-app-id>-8080.<gateway-domain>/auth/realms/selfHosting
+   IMMICH_OIDC_ISSUER_URL=https://<your-app-id>-8443.<gateway-domain>/auth/realms/selfHosting
    ```
 3. Redeploy with `.\deploy-phala.ps1`.

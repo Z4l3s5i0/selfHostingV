@@ -6,9 +6,9 @@ services:
       IMMICH_TELEMETRY_INCLUDE: all
       IMMICH_ALLOW_SETUP: true
       # For Phala Cloud, this should ideally be the public URL so the browser can reach it.
-      # e.g., https://<app-id>-8080.dstack-pha-prod5.phala.network/auth/realms/selfHosting
+      # e.g., https://<app-id>-8443.dstack-pha-prod5.phala.network/auth/realms/selfHosting
       # If you leave it as internal http://keycloak:8080, OIDC login from the browser will fail.
-      IMMICH_OIDC_ISSUER_URL: ${IMMICH_OIDC_ISSUER_URL:-http://keycloak:8080/auth/realms/selfHosting}
+      IMMICH_OIDC_ISSUER_URL: ${IMMICH_OIDC_ISSUER_URL:-https://keycloak:8443/auth/realms/selfHosting}
       IMMICH_OIDC_BUTTON_TEXT: "Login with Keycloak"
       # Phala Cloud environment variables
       DOCKER_REGISTRY: ${DOCKER_REGISTRY}
@@ -103,27 +103,25 @@ services:
     environment:
       KC_HOSTNAME_STRICT: "false"
       KC_HTTP_ENABLED: "true"
+      KC_HTTP_PORT: "8443"
       KC_HOSTNAME_DEBUG: "true"
       KC_LOG_LEVEL: "INFO"
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-admin}
       KC_HTTP_RELATIVE_PATH: /auth
-      KC_HOSTNAME: ${DSTACK_APP_DOMAIN:-localhost}
+      KC_HOSTNAME: https://aeeb4088b56fe813209101a37b1df93646dcb8cf-8443.dstack-pha-prod5.phala.network/auth
       KC_PROXY_HEADERS: xforwarded
-      KC_HOSTNAME_ADMIN_URL: https://${DSTACK_APP_DOMAIN:-localhost}/auth
+      KC_PROXY: edge
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+      KC_HOSTNAME_STRICT_BACKCHANNEL: "false"
+    volumes:
+      - ./certs:/opt/keycloak/conf/:ro
     ports:
-      - "8080:8080"
+      - "8443:8443"
     command:
       - "start-dev"
-      - "--spi-theme-static-max-age=0"
-      - "--http-relative-path=/auth"
       - "--import-realm"
-      - "--http-enabled=true"
-      - "--hostname-debug=true"
-      - "--hostname=${DSTACK_APP_DOMAIN:-localhost}"
-      - "--proxy-headers=xforwarded"
-      - "--hostname-admin-url=https://${DSTACK_APP_DOMAIN:-localhost}/auth"
-#      - "--proxy-protocol-enabled"
+      - "--spi-theme-static-max-age=0"
 volumes:
   upload-data:
   model-cache:

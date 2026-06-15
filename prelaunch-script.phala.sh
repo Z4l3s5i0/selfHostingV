@@ -318,22 +318,23 @@ fi
 #
 # Generate certificates for Keycloak
 #
-if [[ -n "$DSTACK_APP_DOMAIN" ]] && [[ ${#DSTACK_APP_DOMAIN} -le 64 ]]; then
+if [[ -n "$DSTACK_APP_DOMAIN" ]]; then
     echo "Generating certificates for Keycloak..."
     mkdir -p certs
     if [[ ! -f "certs/server.crt" ]]; then
-        openssl req -x509 -newkey rsa:4096 -nodes -sha256 -keyout certs/server.key -out certs/server.crt -subj "/CN=$DSTACK_APP_DOMAIN" -days 365
-        echo "Certificates generated for $DSTACK_APP_DOMAIN"
+        CERT_CN="$DSTACK_APP_DOMAIN"
+        if [[ ${#DSTACK_APP_DOMAIN} -gt 64 ]]; then
+            echo "Domain name too long for CN (${#DSTACK_APP_DOMAIN} characters), using fallback 'phala-cloud'"
+            CERT_CN="phala-cloud"
+        fi
+        openssl req -x509 -newkey rsa:4096 -nodes -sha256 -keyout certs/server.key -out certs/server.crt -subj "/CN=$CERT_CN" -days 365
+        echo "Certificates generated for CN=$CERT_CN"
     else
         echo "Certificates already exist, skipping generation"
     fi
     chmod 644 certs/server.key certs/server.crt
 else
-    if [[ ${#DSTACK_APP_DOMAIN} -gt 64 ]]; then
-        echo "Skipping certificate generation: domain name too long for CN (${#DSTACK_APP_DOMAIN} characters)"
-    else
-        echo "Skipping certificate generation: DSTACK_APP_DOMAIN not set"
-    fi
+    echo "Skipping certificate generation: DSTACK_APP_DOMAIN not set"
 fi
 
 echo "----------------------------------------------"
