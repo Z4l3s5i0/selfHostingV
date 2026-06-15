@@ -114,19 +114,22 @@ services:
         aliases:
           - keycloak.local
     environment:
-      KC_HOSTNAME_STRICT: "false"
       KC_HTTP_ENABLED: "true"
       KC_HTTP_PORT: "8080"
       KC_HOSTNAME_DEBUG: "true"
       KC_LOG_LEVEL: "DEBUG"
+
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-admin}
-      KC_HTTP_RELATIVE_PATH: /auth
-      KC_HOSTNAME: https://aeeb4088b56fe813209101a37b1df93646dcb8cf-8080.dstack-pha-prod9.phala.network/auth
+
       KC_PROXY_HEADERS: xforwarded
       KC_PROXY: edge
-      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
-      KC_HOSTNAME_STRICT_BACKCHANNEL: "false"
+
+      KC_HTTP_RELATIVE_PATH: /auth
+      KC_HOSTNAME_STRICT: "true"
+      KC_HOSTNAME_STRICT_BACKCHANNEL: "true"
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "false"
+      KC_HOSTNAME: https://aeeb4088b56fe813209101a37b1df93646dcb8cf-8080.dstack-pha-prod9.phala.network/auth
     volumes:
       - ./certs:/opt/keycloak/conf/:ro
     ports:
