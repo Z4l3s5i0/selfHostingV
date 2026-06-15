@@ -1,7 +1,7 @@
 # Deployment helper script for Phala Cloud
 
 # Define the CVM ID (from phala cvms ls)
-$CVM_ID = "4060dc2b-2ff9-44de-99b3-e1c33e750d80"
+$CVM_ID = "bceac1bd-9d28-42fe-a07b-34b7c65ab779"
 
 # Load environment variables from .env if it exists
 if (Test-Path .env) {

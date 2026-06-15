@@ -3,7 +3,7 @@ services:
     container_name: immich_server
     image: ghcr.io/immich-app/immich-server@sha256:c15bff75068effb03f4355997d03dc7e0fc58720c2b54ad6f7f10d1bc57efaa5
     environment:
-      IMMICH_CONFIG_FILE: /usr/src/app/config/immich-config.json
+      IMMICH_CONFIG_FILE: /usr/src/app/config/immich-config.local.json
       IMMICH_TELEMETRY_INCLUDE: all
       IMMICH_ALLOW_SETUP: false
       IMMICH_OIDC_ISSUER_URL: http://localhost:8080/auth/realms/selfHosting
@@ -12,7 +12,7 @@ services:
       - "localhost:host-gateway"
     volumes:
       - upload-data:/data
-      - ./immich/immich-config.json:/usr/src/app/config/immich-config.json
+      - ./immich/immich-config.local.json:/usr/src/app/config/immich-config.json
 
     ports:
       - "2283:2283"

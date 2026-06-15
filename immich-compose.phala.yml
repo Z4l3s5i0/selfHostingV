@@ -5,15 +5,14 @@ services:
     environment:
       IMMICH_TELEMETRY_INCLUDE: all
       IMMICH_ALLOW_SETUP: true
-      # For Phala Cloud, this should ideally be the public URL so the browser can reach it.
-      # e.g., https://<app-id>-8443.dstack-pha-prod5.phala.network/auth/realms/selfHosting
-      # If you leave it as internal http://keycloak:8080, OIDC login from the browser will fail.
-      IMMICH_OIDC_ISSUER_URL: ${IMMICH_OIDC_ISSUER_URL:-https://keycloak:8443/auth/realms/selfHosting}
+      IMMICH_OIDC_ISSUER_URL: https://aeeb4088b56fe813209101a37b1df93646dcb8cf-8080.dstack-pha-prod9.phala.network/auth/realms/selfHosting
       IMMICH_OIDC_BUTTON_TEXT: "Login with Keycloak"
-      # Phala Cloud environment variables
       DOCKER_REGISTRY: ${DOCKER_REGISTRY}
-    extra_hosts:
-      - "localhost:host-gateway"
+      NODE_OPTIONS: "--dns-result-order=ipv4first"
+    networks:
+      immich_net:
+#    extra_hosts:
+#      - "aeeb4088b56fe813209101a37b1df93646dcb8cf-8080.dstack-pha-prod9.phala.network:host-gateway"
     volumes:
       - upload-data:/data
     ports:
@@ -32,7 +31,8 @@ services:
     volumes:
       - model-cache:/cache
     restart: always
-
+    networks:
+      - immich_net
   redis:
     container_name: immich_redis
     image: docker.io/valkey/valkey@sha256:8436e10bc65c94886a91d4415b6a6dfa9cb5a306fb3b996e5bb67cd2b4854193
@@ -41,7 +41,8 @@ services:
     ports:
       - "6379:6379"
     restart: always
-
+    networks:
+      - immich_net
   database:
     container_name: immich_postgres
     image: ghcr.io/immich-app/postgres@sha256:bcf63357191b76a916ae5eb93464d65c07511da41e3bf7a8416db519b40b1c23
@@ -55,6 +56,8 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
     restart: always
+    networks:
+      - immich_net
   node-exporter:
     image: prom/node-exporter:latest
     container_name: node-exporter
@@ -70,6 +73,8 @@ services:
     ports:
       - "9100:9100"
     restart: always
+    networks:
+      - immich_net
   immich-prometheus:
     container_name: immich_prometheus
     ports:
@@ -83,6 +88,8 @@ services:
       - prometheus-data:/prometheus
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
+    networks:
+      - immich_net
   immich-grafana:
     container_name: immich_grafana
     command: [ './run.sh', '-disable-reporting' ] # this is to disable Grafana's telemetry
@@ -96,20 +103,26 @@ services:
     volumes:
       # stores your pretty dashboards and panels
       - grafana-data:/var/lib/grafana
+    networks:
+      - immich_net
   keycloak:
     image: ${DOCKER_REGISTRY}/keycloak-custom:latest
     container_name: keycloak
     restart: unless-stopped
+    networks:
+      immich_net:
+        aliases:
+          - keycloak.local
     environment:
       KC_HOSTNAME_STRICT: "false"
       KC_HTTP_ENABLED: "true"
-      KC_HTTP_PORT: "8443"
+      KC_HTTP_PORT: "8080"
       KC_HOSTNAME_DEBUG: "true"
-      KC_LOG_LEVEL: "INFO"
+      KC_LOG_LEVEL: "DEBUG"
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-admin}
       KC_HTTP_RELATIVE_PATH: /auth
-      KC_HOSTNAME: https://aeeb4088b56fe813209101a37b1df93646dcb8cf-8443.dstack-pha-prod5.phala.network/auth
+      KC_HOSTNAME: https://aeeb4088b56fe813209101a37b1df93646dcb8cf-8080.dstack-pha-prod9.phala.network/auth
       KC_PROXY_HEADERS: xforwarded
       KC_PROXY: edge
       KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
@@ -117,7 +130,7 @@ services:
     volumes:
       - ./certs:/opt/keycloak/conf/:ro
     ports:
-      - "8443:8443"
+      - "8080:8080"
     command:
       - "start-dev"
       - "--import-realm"
@@ -128,3 +141,9 @@ volumes:
   db-data:
   prometheus-data:
   grafana-data:
+networks:
+  immich_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16
