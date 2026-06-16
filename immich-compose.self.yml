@@ -90,10 +90,16 @@ services:
       - 3001:3000
     image: grafana/grafana
     volumes:
-      # stores your pretty dashboards and panels
       - grafana-data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
       - ./grafana/dashboards:/var/lib/grafana/dashboards
+  immich-exporter:
+    container_name: immich_exporter
+    image: martabal/immich-exporter:latest
+    environment:
+      IMMICH_HOST: http://immich-server:8081
+      IMMICH_AUTH_KEY: ${IMMICH_AUTH_KEY}
+    restart: always
   keycloak:
     image: quay.io/keycloak/keycloak:26.0.7
     container_name: keycloak

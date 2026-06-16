@@ -105,6 +105,32 @@ services:
       - grafana-data:/var/lib/grafana
     networks:
       - immich_net
+  immich-exporter:
+    container_name: immich_exporter
+    image: martabal/immich-exporter:latest
+    environment:
+      IMMICH_HOST: http://immich-server:8081
+      IMMICH_AUTH_KEY: ${IMMICH_AUTH_KEY}
+    networks:
+      - immich_net
+    restart: always
+
+  mysql:
+    image: mysql:8.0
+    container_name: keycloak_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: keycloak
+      MYSQL_USER: keycloak
+      MYSQL_PASSWORD: keycloak
+    ports:
+      - "3306:3306" # MySQL Port
+    networks:
+      immich_net:
+    volumes:
+      - keycloak_mysql_data:/var/lib/mysql
+
   keycloak:
     image: ${DOCKER_REGISTRY}/keycloak-custom:latest
     container_name: keycloak
@@ -121,6 +147,11 @@ services:
       KC_METRICS_ENABLED: "true"
       KC_HEALTH_ENABLED: "true"
 
+      KC_DB: mysql
+      KC_DB_URL: jdbc:mysql://mysql:3306/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-admin}
 
@@ -134,6 +165,8 @@ services:
       KC_HOSTNAME: https://aeeb4088b56fe813209101a37b1df93646dcb8cf-8080.dstack-pha-prod9.phala.network/auth
     volumes:
       - ./certs:/opt/keycloak/conf/:ro
+    depends_on:
+      - mysql
     ports:
       - "8080:8080"
       - "9000:9000"
@@ -147,6 +180,7 @@ volumes:
   db-data:
   prometheus-data:
   grafana-data:
+  keycloak_mysql_data:
 networks:
   immich_net:
     driver: bridge
