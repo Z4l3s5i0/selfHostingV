@@ -172,7 +172,7 @@
         }
       ],
       "title": "Host CPU Usage",
-      "type": "gauge"
+      "type": "stat"
     },
     {
       "datasource": {
@@ -229,62 +229,6 @@
         }
       ],
       "title": "Host Memory Usage",
-      "type": "gauge"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "Prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 12,
-        "y": 4
-      },
-      "id": 2,
-      "options": {
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "text": {}
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "Prometheus"
-          },
-          "expr": "immich_users_total",
-          "instant": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Total Users",
       "type": "stat"
     },
     {
@@ -312,7 +256,7 @@
       "gridPos": {
         "h": 4,
         "w": 6,
-        "x": 18,
+        "x": 12,
         "y": 4
       },
       "id": 22,
@@ -342,132 +286,6 @@
       ],
       "title": "Keycloak Sessions",
       "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "Prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "max": 1,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 0.7
-              },
-              {
-                "color": "red",
-                "value": 0.9
-              }
-            ]
-          },
-          "unit": "percentunit"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 6,
-        "y": 4
-      },
-      "id": 3,
-      "options": {
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "text": {}
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "Prometheus"
-          },
-          "expr": "process_cpu_utilization{job=\"immich-api\"}",
-          "instant": true,
-          "refId": "A"
-        }
-      ],
-      "title": "CPU Usage (API)",
-      "type": "gauge"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "Prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "bytes"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 12,
-        "y": 4
-      },
-      "id": 4,
-      "options": {
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "text": {}
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "Prometheus"
-          },
-          "expr": "process_memory_usage{job=\"immich-api\"}",
-          "instant": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Memory Usage (API)",
-      "type": "gauge"
     },
     {
       "datasource": {
@@ -533,7 +351,7 @@
         }
       ],
       "title": "Space Left",
-      "type": "gauge"
+      "type": "stat"
     },
     {
       "datasource": {
@@ -544,7 +362,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 8
+        "y": 12
       },
       "id": 6,
       "options": {
@@ -587,7 +405,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 8
+        "y": 12
       },
       "id": 7,
       "options": {
@@ -674,24 +492,42 @@
         "type": "prometheus",
         "uid": "Prometheus"
       },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
       "gridPos": {
         "h": 4,
-        "w": 12,
+        "w": 4,
         "x": 0,
         "y": 20
       },
-      "id": 11,
+      "id": 2,
       "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
         },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "text": {}
       },
       "targets": [
         {
@@ -699,13 +535,13 @@
             "type": "prometheus",
             "uid": "Prometheus"
           },
-          "expr": "sum(increase(keycloak_events_total[5m])) by (event)",
-          "legendFormat": "{{event}}",
+          "expr": "immich_users_total",
+          "instant": true,
           "refId": "A"
         }
       ],
-      "title": "Keycloak Events Over Time",
-      "type": "timeseries"
+      "title": "Total Users",
+      "type": "stat"
     },
     {
       "datasource": {
@@ -731,9 +567,9 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 4,
-        "x": 0,
-        "y": 24
+        "w": 5,
+        "x": 4,
+        "y": 20
       },
       "id": 14,
       "options": {
@@ -787,9 +623,9 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 4,
-        "x": 4,
-        "y": 24
+        "w": 5,
+        "x": 9,
+        "y": 20
       },
       "id": 15,
       "options": {
@@ -843,9 +679,9 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 4,
-        "x": 8,
-        "y": 24
+        "w": 5,
+        "x": 14,
+        "y": 20
       },
       "id": 12,
       "options": {
@@ -898,9 +734,9 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
+        "h": 4,
+        "w": 5,
+        "x": 19,
         "y": 20
       },
       "id": 13,
