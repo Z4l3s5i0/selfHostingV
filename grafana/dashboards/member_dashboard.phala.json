@@ -279,7 +279,7 @@
             "type": "prometheus",
             "uid": "Prometheus"
           },
-          "expr": "vendor_statistics_approximate_entries{cache=\"users\"}",
+          "expr": "vendor_statistics_approximate_entries{cache=\"sessions\"}",
           "instant": true,
           "refId": "A"
         }

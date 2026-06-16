@@ -61,7 +61,7 @@ This script will build and push custom images to your registry and then initiate
 
 ## Post-Deployment: User Management (local deployment only)
 
-Once the stack is running, you need to initialize the admin users.
+Once the stack is running, you need to initialize the admin users. Note that 4 accounts have been created for testing purposes (see submission).
 
 ### 1. Initial Bootstrap
 Run these scripts to create the initial admin user in Keycloak and sync it with Immich:
