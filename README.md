@@ -92,3 +92,7 @@ The script enforces password policies and assigns appropriate roles (`immich_use
 - **Immich:** [https://d9222cfae9dab9f3d2229e8e8fa64e64a29d25ec-2283.dstack-pha-prod9.phala.network](https://d9222cfae9dab9f3d2229e8e8fa64e64a29d25ec-2283.dstack-pha-prod9.phala.network)
 - **Keycloak:** [https://d9222cfae9dab9f3d2229e8e8fa64e64a29d25ec-8080.dstack-pha-prod9.phala.network/auth](https://d9222cfae9dab9f3d2229e8e8fa64e64a29d25ec-8080.dstack-pha-prod9.phala.network/auth)
 
+## License
+
+This project is licensed under the Creative Commons Attribution 4.0 International License. See the [LICENSE](https://creativecommons.org/licenses/by/4.0/) for details.
+
