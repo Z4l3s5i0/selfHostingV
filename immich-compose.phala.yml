@@ -5,7 +5,7 @@ services:
     environment:
       IMMICH_TELEMETRY_INCLUDE: all
       IMMICH_ALLOW_SETUP: true
-      IMMICH_OIDC_ISSUER_URL: https://aeeb4088b56fe813209101a37b1df93646dcb8cf-8080.dstack-pha-prod9.phala.network/auth/realms/selfHosting
+      IMMICH_OIDC_ISSUER_URL: ${PUBLIC_SERVICES_DOMAIN}/auth/realms/selfHosting
       IMMICH_OIDC_BUTTON_TEXT: "Login with Keycloak"
       DOCKER_REGISTRY: ${DOCKER_REGISTRY}
       NODE_OPTIONS: "--dns-result-order=ipv4first"
@@ -109,7 +109,7 @@ services:
     container_name: immich_exporter
     image: martabal/immich-exporter:latest
     environment:
-      IMMICH_HOST: http://immich-server:8081
+      IMMICH_HOST: ${IMMICH_SERVER_HOST}
       IMMICH_AUTH_KEY: ${IMMICH_AUTH_KEY}
     networks:
       - immich_net
@@ -120,10 +120,10 @@ services:
     container_name: keycloak_mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: keycloak
-      MYSQL_USER: keycloak
-      MYSQL_PASSWORD: keycloak
+      MYSQL_ROOT_PASSWORD: ${KEYCLOAK_MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${KEYCLOAK_MYSQL_DATABASE}
+      MYSQL_USER: ${KEYCLOAK_MYSQL_USER}
+      MYSQL_PASSWORD: ${KEYCLOAK_MYSQL_PASSWORD}
     ports:
       - "3306:3306" # MySQL Port
     networks:
@@ -148,9 +148,9 @@ services:
       KC_HEALTH_ENABLED: "true"
 
       KC_DB: mysql
-      KC_DB_URL: jdbc:mysql://mysql:3306/keycloak
-      KC_DB_USERNAME: keycloak
-      KC_DB_PASSWORD: keycloak
+      KC_DB_URL: jdbc:mysql://mysql:3306/${KEYCLOAK_MYSQL_DATABASE}
+      KC_DB_USERNAME: ${KEYCLOAK_MYSQL_USER}
+      KC_DB_PASSWORD: ${KEYCLOAK_MYSQL_PASSWORD}
 
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-admin}
@@ -162,7 +162,7 @@ services:
       KC_HOSTNAME_STRICT: "true"
       KC_HOSTNAME_STRICT_BACKCHANNEL: "true"
       KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "false"
-      KC_HOSTNAME: https://aeeb4088b56fe813209101a37b1df93646dcb8cf-8080.dstack-pha-prod9.phala.network/auth
+      KC_HOSTNAME: ${PUBLIC_SERVICES_DOMAIN}/auth
     volumes:
       - ./certs:/opt/keycloak/conf/:ro
     depends_on:
