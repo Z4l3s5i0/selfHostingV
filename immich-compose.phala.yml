@@ -3,6 +3,7 @@ services:
     container_name: immich_server
     image: ${DOCKER_REGISTRY}/immich-server-custom:latest
     environment:
+      IMMICH_TRUST_PROXY: "true"
       IMMICH_TELEMETRY_INCLUDE: all
       IMMICH_ALLOW_SETUP: true
       IMMICH_OIDC_ISSUER_URL: https://${PHALA_CVM_ID}-8080.dstack-pha-prod9.phala.network/auth/realms/selfHosting
@@ -95,6 +96,8 @@ services:
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
       - GF_AUTH_ANONYMOUS_ORG_NAME=Main Org.
+      - GF_INSTALL_PLUGINS=yesoreyeram-infinity-datasource
+      - IMMICH_API_KEY=${IMMICH_API_KEY}
     ports:
       - 3001:3000
     image: ${DOCKER_REGISTRY}/grafana-custom:latest
@@ -103,16 +106,6 @@ services:
       - grafana-data:/var/lib/grafana
     networks:
       - immich_net
-  immich-exporter:
-    container_name: immich_exporter
-    image: martabal/immich-exporter:latest
-    environment:
-      IMMICH_HOST: ${IMMICH_SERVER_HOST}
-      IMMICH_AUTH_KEY: ${IMMICH_AUTH_KEY}
-    networks:
-      - immich_net
-    restart: always
-
   mysql:
     image: mysql:8.0
     container_name: keycloak_mysql

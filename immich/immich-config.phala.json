@@ -198,7 +198,7 @@
     "issuerUrl": "https://d9222cfae9dab9f3d2229e8e8fa64e64a29d25ec-8080.dstack-pha-prod9.phala.network/auth/realms/selfHosting",
     "mobileOverrideEnabled": false,
     "mobileRedirectUri": "https://d9222cfae9dab9f3d2229e8e8fa64e64a29d25ec-2283.dstack-pha-prod9.phala.network/api/oauth/mobile-redirect",
-    "profileSigningAlgorithm": "none",
+    "profileSigningAlgorithm": "RS256",
     "roleClaim": "immich_admin",
     "scope": "openid email profile",
     "signingAlgorithm": "RS256",

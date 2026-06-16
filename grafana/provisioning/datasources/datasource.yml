@@ -6,3 +6,7 @@ datasources:
     access: proxy
     url: http://immich-prometheus:9090
     isDefault: true
+  - name: Infinity
+    type: yesoreyeram-infinity-datasource
+    access: proxy
+    url: http://immich-server:2283

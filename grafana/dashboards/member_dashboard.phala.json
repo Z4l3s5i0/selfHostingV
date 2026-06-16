@@ -588,15 +588,26 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "Prometheus"
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "Infinity"
           },
-          "expr": "immich_assets_images",
-          "instant": true,
-          "refId": "A"
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "url": "http://immich-server:2283/api/server/statistics",
+          "method": "GET",
+          "parser": "backend",
+          "root_selector": "",
+          "columns": [
+            {
+              "text": "photos",
+              "type": "number",
+              "selector": "photos"
+            }
+          ]
         }
       ],
-      "title": "Total Images (Immich)",
+      "title": "Total Images",
       "type": "stat"
     },
     {
@@ -644,15 +655,26 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "Prometheus"
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "Infinity"
           },
-          "expr": "immich_assets_videos",
-          "instant": true,
-          "refId": "A"
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "url": "http://immich-server:2283/api/server/statistics",
+          "method": "GET",
+          "parser": "backend",
+          "root_selector": "",
+          "columns": [
+            {
+              "text": "videos",
+              "type": "number",
+              "selector": "videos"
+            }
+          ]
         }
       ],
-      "title": "Total Videos (Immich)",
+      "title": "Total Videos",
       "type": "stat"
     },
     {
@@ -700,15 +722,26 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "Prometheus"
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "Infinity"
           },
-          "expr": "immich_assets_total",
-          "instant": true,
-          "refId": "A"
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "url": "http://immich-server:2283/api/server/statistics",
+          "method": "GET",
+          "parser": "backend",
+          "root_selector": "",
+          "columns": [
+            {
+              "text": "assets",
+              "type": "number",
+              "selector": "assets"
+            }
+          ]
         }
       ],
-      "title": "Total Assets (Immich)",
+      "title": "Total Assets",
       "type": "stat"
     },
     {
@@ -756,12 +789,23 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "Prometheus"
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "Infinity"
           },
-          "expr": "immich_media_size_bytes_total",
-          "instant": true,
-          "refId": "A"
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "url": "http://immich-server:2283/api/server/statistics",
+          "method": "GET",
+          "parser": "backend",
+          "root_selector": "",
+          "columns": [
+            {
+              "text": "usage",
+              "type": "number",
+              "selector": "usage"
+            }
+          ]
         }
       ],
       "title": "Total Library Size",

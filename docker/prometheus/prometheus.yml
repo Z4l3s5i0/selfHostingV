@@ -19,6 +19,3 @@ scrape_configs:
     static_configs:
       - targets: ['keycloak:9000']
 
-  - job_name: 'immich-exporter'
-    static_configs:
-      - targets: ['immich-exporter:8080']
