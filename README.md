@@ -35,7 +35,7 @@ This script will:
 
 **Access:**
 - **Immich:** [http://localhost:2283](http://localhost:2283)
-- **Keycloak:** [http://localhost:8080](http://localhost:8080)
+- **Keycloak:** [http://localhost:8080/auth](http://localhost:8080/auth)
 - **Grafana Dashboards:** [http://localhost:3001/d/member_dashboard](http://localhost:3001/d/member_dashboard)
 
 ---
@@ -55,6 +55,7 @@ For deploying to a decentralized environment on Phala Cloud.
    ./scripts/phala/deploy-phala.ps1
    ```
 This script will build and push custom images to your registry and then initiate the Phala deployment.
+
 
 ---
 
@@ -79,10 +80,15 @@ Use the interactive script to add new community members:
 ```
 The script enforces password policies and assigns appropriate roles (`immich_user` or `immich_admin`).
 
-## Monitoring and Metrics
+## Monitoring and Metrics on localhost
 
-- **Grafana Dashboard:** [http://localhost:3001/d/member_dashboard](http://localhost:3001/d/member_dashboard)
-- **API metrics:** [http://localhost:8081/metrics](http://localhost:8081/metrics)
-- **Microservice metrics:** [http://localhost:8082/metrics](http://localhost:8082/metrics)
-- **Prometheus:** [http://localhost:9090](http://localhost:9090)
-- **Node Exporter:** [http://localhost:9100/metrics](http://localhost:9100/metrics)
+- **Grafana Dashboards:** [http://localhost:3001/d/member_dashboard](http://localhost:3001/d/member_dashboard)
+- **Immich:** [http://localhost:2283](http://localhost:2283)
+- **Keycloak:** [http://localhost:8080/auth](http://localhost:8080/auth)
+
+## Monitoring and Metrics on phala cloud
+**Access:**
+- **Grafana Dashboards:** [https://d9222cfae9dab9f3d2229e8e8fa64e64a29d25ec-3001.dstack-pha-prod9.phala.network/d/member_dashboard](https://d9222cfae9dab9f3d2229e8e8fa64e64a29d25ec-3001.dstack-pha-prod9.phala.network/d/member_dashboard)
+- **Immich:** [https://d9222cfae9dab9f3d2229e8e8fa64e64a29d25ec-2283.dstack-pha-prod9.phala.network](https://d9222cfae9dab9f3d2229e8e8fa64e64a29d25ec-2283.dstack-pha-prod9.phala.network)
+- **Keycloak:** [https://d9222cfae9dab9f3d2229e8e8fa64e64a29d25ec-8080.dstack-pha-prod9.phala.network/auth](https://d9222cfae9dab9f3d2229e8e8fa64e64a29d25ec-8080.dstack-pha-prod9.phala.network/auth)
+
