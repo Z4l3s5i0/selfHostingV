@@ -279,7 +279,7 @@
             "type": "prometheus",
             "uid": "Prometheus"
           },
-          "expr": "keycloak_sessions",
+          "expr": "vendor_statistics_approximate_entries{cache=\"users\"}",
           "instant": true,
           "refId": "A"
         }
@@ -383,7 +383,7 @@
             "type": "prometheus",
             "uid": "Prometheus"
           },
-          "expr": "sum(increase(http_server_duration_count[5m]))",
+          "expr": "sum(increase(http_server_duration_count[1m]))",
           "legendFormat": "Requests/sec",
           "refId": "A"
         }
@@ -545,8 +545,8 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "Prometheus"
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "Infinity"
       },
       "fieldConfig": {
         "defaults": {
@@ -595,6 +595,10 @@
           "type": "json",
           "source": "url",
           "url": "http://immich-server:2283/api/server/statistics",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
           "method": "GET",
           "parser": "backend",
           "root_selector": "",
@@ -612,8 +616,8 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "Prometheus"
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "Infinity"
       },
       "fieldConfig": {
         "defaults": {
@@ -662,6 +666,10 @@
           "type": "json",
           "source": "url",
           "url": "http://immich-server:2283/api/server/statistics",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
           "method": "GET",
           "parser": "backend",
           "root_selector": "",
@@ -679,8 +687,8 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "Prometheus"
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "Infinity"
       },
       "fieldConfig": {
         "defaults": {
@@ -729,6 +737,10 @@
           "type": "json",
           "source": "url",
           "url": "http://immich-server:2283/api/server/statistics",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
           "method": "GET",
           "parser": "backend",
           "root_selector": "",
@@ -746,8 +758,8 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "Prometheus"
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "Infinity"
       },
       "fieldConfig": {
         "defaults": {
@@ -796,6 +808,10 @@
           "type": "json",
           "source": "url",
           "url": "http://immich-server:2283/api/server/statistics",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
           "method": "GET",
           "parser": "backend",
           "root_selector": "",
