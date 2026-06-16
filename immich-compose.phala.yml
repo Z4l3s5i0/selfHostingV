@@ -118,6 +118,8 @@ services:
       KC_HTTP_PORT: "8080"
       KC_HOSTNAME_DEBUG: "true"
       KC_LOG_LEVEL: "DEBUG"
+      KC_METRICS_ENABLED: "true"
+      KC_HEALTH_ENABLED: "true"
 
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-admin}
@@ -134,6 +136,7 @@ services:
       - ./certs:/opt/keycloak/conf/:ro
     ports:
       - "8080:8080"
+      - "9000:9000"
     command:
       - "start-dev"
       - "--import-realm"
