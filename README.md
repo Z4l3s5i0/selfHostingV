@@ -96,3 +96,6 @@ The script enforces password policies and assigns appropriate roles (`immich_use
 
 This project is licensed under the Creative Commons Attribution 4.0 International License. See the [LICENSE](https://creativecommons.org/licenses/by/4.0/) for details.
 
+## Disclaimer
+This project is not affiliated with Immich or Keycloak.
+For some parts of the project, mainly for the nature of debugging, Google Gemini has been used.
