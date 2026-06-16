@@ -1,19 +1,20 @@
 services:
   immich-server:
     container_name: immich_server
-    image: ghcr.io/immich-app/immich-server@sha256:c15bff75068effb03f4355997d03dc7e0fc58720c2b54ad6f7f10d1bc57efaa5
+    image: ${DOCKER_REGISTRY}/immich-server-custom:latest
     environment:
-      IMMICH_CONFIG_FILE: /usr/src/app/config/immich-config.local.json
       IMMICH_TELEMETRY_INCLUDE: all
-      IMMICH_ALLOW_SETUP: false
+      IMMICH_ALLOW_SETUP: true
       IMMICH_OIDC_ISSUER_URL: http://localhost:8080/auth/realms/selfHosting
       IMMICH_OIDC_BUTTON_TEXT: "Login with Keycloak"
+      DOCKER_REGISTRY: ${DOCKER_REGISTRY}
+      NODE_OPTIONS: "--dns-result-order=ipv4first"
+    networks:
+      immich_net:
     extra_hosts:
       - "localhost:host-gateway"
     volumes:
       - upload-data:/data
-      - ./immich/immich-config.local.json:/usr/src/app/config/immich-config.json
-
     ports:
       - "2283:2283"
       - "8081:8081"
@@ -30,7 +31,8 @@ services:
     volumes:
       - model-cache:/cache
     restart: always
-
+    networks:
+      - immich_net
   redis:
     container_name: immich_redis
     image: docker.io/valkey/valkey@sha256:8436e10bc65c94886a91d4415b6a6dfa9cb5a306fb3b996e5bb67cd2b4854193
@@ -39,7 +41,8 @@ services:
     ports:
       - "6379:6379"
     restart: always
-
+    networks:
+      - immich_net
   database:
     container_name: immich_postgres
     image: ghcr.io/immich-app/postgres@sha256:bcf63357191b76a916ae5eb93464d65c07511da41e3bf7a8416db519b40b1c23
@@ -53,17 +56,8 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
     restart: always
-  immich-prometheus:
-    container_name: immich_prometheus
-    ports:
-      # this exposes the default port for Prometheus so you can interact with it
-      - 9090:9090
-    image: prom/prometheus
-    volumes:
-      # the Prometheus configuration file - a barebones one is provided to get started
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-      # a named volume defined in the bottom of the Compose file; it can also be a mounted folder
-      - prometheus-data:/prometheus
+    networks:
+      - immich_net
   node-exporter:
     image: prom/node-exporter:latest
     container_name: node-exporter
@@ -79,6 +73,23 @@ services:
     ports:
       - "9100:9100"
     restart: always
+    networks:
+      - immich_net
+  immich-prometheus:
+    container_name: immich_prometheus
+    ports:
+      # this exposes the default port for Prometheus so you can interact with it
+      - "9090:9090"
+    image: ${DOCKER_REGISTRY}/prometheus-custom:latest
+    depends_on:
+      - node-exporter
+      - immich-server
+    volumes:
+      - prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    networks:
+      - immich_net
   immich-grafana:
     container_name: immich_grafana
     command: [ './run.sh', '-disable-reporting' ] # this is to disable Grafana's telemetry
@@ -88,40 +99,100 @@ services:
       - GF_AUTH_ANONYMOUS_ORG_NAME=Main Org.
     ports:
       - 3001:3000
-    image: grafana/grafana
+    image: ${DOCKER_REGISTRY}/grafana-custom:latest
     volumes:
+      # stores your pretty dashboards and panels
       - grafana-data:/var/lib/grafana
-      - ./grafana/provisioning:/etc/grafana/provisioning
-      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    networks:
+      - immich_net
   immich-exporter:
     container_name: immich_exporter
     image: martabal/immich-exporter:latest
     environment:
-      IMMICH_HOST: http://immich-server:8081
+      IMMICH_HOST: ${IMMICH_SERVER_HOST}
       IMMICH_AUTH_KEY: ${IMMICH_AUTH_KEY}
+    networks:
+      - immich_net
     restart: always
-  keycloak:
-    image: quay.io/keycloak/keycloak:26.0.7
-    container_name: keycloak
+
+  mysql:
+    image: mysql:8.0
+    container_name: keycloak_mysql
     restart: unless-stopped
     environment:
+      MYSQL_ROOT_PASSWORD: ${KEYCLOAK_MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${KEYCLOAK_MYSQL_DATABASE}
+      MYSQL_USER: ${KEYCLOAK_MYSQL_USER}
+      MYSQL_PASSWORD: ${KEYCLOAK_MYSQL_PASSWORD}
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    ports:
+      - "3306:3306" # MySQL Port
+    networks:
+      immich_net:
+    volumes:
+      - keycloak_mysql_data:/var/lib/mysql
+
+  keycloak:
+    image: ${DOCKER_REGISTRY}/keycloak-custom:latest
+    container_name: keycloak
+    restart: unless-stopped
+    networks:
+      immich_net:
+        aliases:
+          - keycloak.local
+    environment:
+      KC_HTTP_ENABLED: "true"
+      KC_HTTP_PORT: "8080"
+      KC_HOSTNAME_DEBUG: "true"
+      KC_LOG_LEVEL: "INFO"
+      KC_METRICS_ENABLED: "true"
+      KC_HEALTH_ENABLED: "true"
+
+      KC_DB: mysql
+      KC_DB_URL: jdbc:mysql://mysql:3306/${KEYCLOAK_MYSQL_DATABASE}
+      KC_DB_USERNAME: ${KEYCLOAK_MYSQL_USER}
+      KC_DB_PASSWORD: ${KEYCLOAK_MYSQL_PASSWORD}
+
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-admin}
+
+      KC_PROXY_HEADERS: xforwarded
+      KC_PROXY: edge
+
       KC_HTTP_RELATIVE_PATH: /auth
+      KC_HOSTNAME_STRICT: "true"
+      KC_HOSTNAME_STRICT_BACKCHANNEL: "true"
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "false"
+      KC_HOSTNAME: http://localhost:8080/auth
+    volumes:
+      - ./certs:/opt/keycloak/conf/:ro
+      - ./keycloak/realm-export.local.json:/opt/keycloak/data/import/realm-export.json:ro
+    depends_on:
+      mysql:
+        condition: service_healthy
     ports:
       - "8080:8080"
+      - "9000:9000"
     command:
       - "start-dev"
       - "--import-realm"
+      - "-Dkeycloak.migration.strategy=OVERWRITE_EXISTING"
       - "--spi-theme-static-max-age=0"
-      - "--http-enabled=true"
-      - "--hostname-strict=false"
-    volumes:
-      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
-      - ./keycloak-themes:/opt/keycloak/themes
 volumes:
   upload-data:
   model-cache:
   db-data:
   prometheus-data:
   grafana-data:
+  keycloak_mysql_data:
+networks:
+  immich_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16

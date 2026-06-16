@@ -1,12 +1,10 @@
 # Deployment helper script for Phala Cloud
 
-# Define the CVM ID (from phala cvms ls)
-$CVM_ID = "bceac1bd-9d28-42fe-a07b-34b7c65ab779"
-
 # Load environment variables from .env if it exists
-if (Test-Path .env) {
+$EnvFile = Join-Path $PSScriptRoot "../../.env"
+if (Test-Path $EnvFile) {
     Write-Host "Loading environment variables from .env..." -ForegroundColor Gray
-    Get-Content .env | Where-Object { $_ -match '=' -and $_ -notmatch '^#' } | ForEach-Object {
+    Get-Content $EnvFile | Where-Object { $_ -match '=' -and $_ -notmatch '^#' } | ForEach-Object {
         $name, $value = $_.Split('=', 2)
         if (-not [string]::IsNullOrWhiteSpace($name)) {
             $name = $name.Trim()
@@ -21,6 +19,9 @@ if (Test-Path .env) {
         }
     }
 }
+
+# Define the CVM ID (from phala cvms ls)
+$CVM_ID = $env:ENVCVM_ID
 
 # Define your Docker Registry (required for custom images)
 $DOCKER_REGISTRY = $env:DOCKER_REGISTRY
@@ -74,32 +75,29 @@ if (Test-Path $DockerConfigPath) {
 }
 
 Write-Host "Building and Pushing custom images to $DOCKER_REGISTRY..." -ForegroundColor Cyan
-.\build-images.ps1 -Registry $DOCKER_REGISTRY
+& (Join-Path $PSScriptRoot "../build-images.ps1") -Registry $DOCKER_REGISTRY -Environment "phala"
 
 Write-Host "Starting deployment to Phala Cloud CVM: $CVM_ID..." -ForegroundColor Cyan
 
 # Check if .env exists
-if (-Not (Test-Path .env)) {
+if (-Not (Test-Path $EnvFile)) {
     Write-Error ".env file not found. Please create one based on the documentation."
     exit 1
 }
 
 # Run the phala deploy command
-# --compose: specifies the Phala-optimized compose file
-# --cvm-id: specifies the target CVM
-# --env: includes environment variables from .env
-# --pre-launch-script: includes the pre-launch script for initialization
-# --wait: waits for the deployment to finish
-#
+$ComposeFile = Join-Path $PSScriptRoot "../../immich-compose.phala.yml"
+$PreLaunchScript = Join-Path $PSScriptRoot "./prelaunch-script.phala.sh"
+
 phala deploy `
-    --compose immich-compose.phala.yml `
+    --compose $ComposeFile `
     --cvm-id $CVM_ID `
-    -e .env `
-    --pre-launch-script prelaunch-script.phala.sh `
+    -e $EnvFile `
+    --pre-launch-script $PreLaunchScript `
     --wait
 # phala deploy `
-#     --compose immich-compose.phala.yml `
-#     -e .env `
+#     --compose ../../immich-compose.phala.yml `
+#     -e ../../.env `
 #     --pre-launch-script prelaunch-script.phala.sh `
 #     --wait
 

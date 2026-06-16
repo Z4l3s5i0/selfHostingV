@@ -337,6 +337,38 @@ else
     echo "Skipping certificate generation: DSTACK_APP_DOMAIN not set"
 fi
 
+#
+# Prepare Keycloak realm export
+#
+echo "Preparing Keycloak realm export..."
+# Clean up any legacy directory-turned-file that Docker might have created
+if [[ -d "keycloak/realm-export.phala.json" ]]; then
+    echo "Removing legacy directory keycloak/realm-export.phala.json"
+    rm -rf "keycloak/realm-export.phala.json"
+fi
+
+# Ensure the import directory exists for the volume mount
+rm -rf keycloak/import
+mkdir -p keycloak/import
+
+# Try to find and copy the realm export file to the target name
+if [[ -f "keycloak/realm-export.phala.json" ]]; then
+    cp "keycloak/realm-export.phala.json" "keycloak/import/realm-export.json"
+    echo "Copied keycloak/realm-export.phala.json to keycloak/import/realm-export.json"
+elif [[ -f "realm-export.phala.json" ]]; then
+    cp "realm-export.phala.json" "keycloak/import/realm-export.json"
+    echo "Copied realm-export.phala.json to keycloak/import/realm-export.json"
+else
+    echo "Warning: realm-export.phala.json not found! Trying to find it anywhere..."
+    REALM_SRC=$(find . -name "realm-export.phala.json" | head -n 1)
+    if [[ -n "$REALM_SRC" ]]; then
+        cp "$REALM_SRC" "keycloak/import/realm-export.json"
+        echo "Found and copied $REALM_SRC to keycloak/import/realm-export.json"
+    else
+        echo "Error: Could not find realm-export.phala.json. Keycloak import may fail."
+    fi
+fi
+
 echo "----------------------------------------------"
 echo "Script execution completed"
 echo "----------------------------------------------"

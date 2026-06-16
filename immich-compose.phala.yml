@@ -5,14 +5,12 @@ services:
     environment:
       IMMICH_TELEMETRY_INCLUDE: all
       IMMICH_ALLOW_SETUP: true
-      IMMICH_OIDC_ISSUER_URL: ${PUBLIC_SERVICES_DOMAIN}/auth/realms/selfHosting
+      IMMICH_OIDC_ISSUER_URL: https://${PHALA_CVM_ID}-8080.dstack-pha-prod9.phala.network/auth/realms/selfHosting
       IMMICH_OIDC_BUTTON_TEXT: "Login with Keycloak"
       DOCKER_REGISTRY: ${DOCKER_REGISTRY}
       NODE_OPTIONS: "--dns-result-order=ipv4first"
     networks:
       immich_net:
-#    extra_hosts:
-#      - "aeeb4088b56fe813209101a37b1df93646dcb8cf-8080.dstack-pha-prod9.phala.network:host-gateway"
     volumes:
       - upload-data:/data
     ports:
@@ -124,6 +122,12 @@ services:
       MYSQL_DATABASE: ${KEYCLOAK_MYSQL_DATABASE}
       MYSQL_USER: ${KEYCLOAK_MYSQL_USER}
       MYSQL_PASSWORD: ${KEYCLOAK_MYSQL_PASSWORD}
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
     ports:
       - "3306:3306" # MySQL Port
     networks:
@@ -143,7 +147,7 @@ services:
       KC_HTTP_ENABLED: "true"
       KC_HTTP_PORT: "8080"
       KC_HOSTNAME_DEBUG: "true"
-      KC_LOG_LEVEL: "DEBUG"
+      KC_LOG_LEVEL: "INFO"
       KC_METRICS_ENABLED: "true"
       KC_HEALTH_ENABLED: "true"
 
@@ -162,17 +166,20 @@ services:
       KC_HOSTNAME_STRICT: "true"
       KC_HOSTNAME_STRICT_BACKCHANNEL: "true"
       KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "false"
-      KC_HOSTNAME: ${PUBLIC_SERVICES_DOMAIN}/auth
+      KC_HOSTNAME: https://${PHALA_CVM_ID}-8080.dstack-pha-prod9.phala.network/auth
     volumes:
       - ./certs:/opt/keycloak/conf/:ro
+      - ./keycloak/import:/opt/keycloak/data/import/:ro
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     ports:
       - "8080:8080"
       - "9000:9000"
     command:
       - "start-dev"
       - "--import-realm"
+      - "-Dkeycloak.migration.strategy=OVERWRITE_EXISTING"
       - "--spi-theme-static-max-age=0"
 volumes:
   upload-data:

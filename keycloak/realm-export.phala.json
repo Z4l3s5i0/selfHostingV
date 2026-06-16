@@ -729,8 +729,8 @@
       "clientAuthenticatorType": "client-secret",
       "secret": "IZrJX5piAh9Evlw8jogpNZDFdVX0s12T",
       "redirectUris": [
-        "https://*",
-        "/*"
+        "https://d9222cfae9dab9f3d2229e8e8fa64e64a29d25ec-2283.dstack-pha-prod9.phala.network/*",
+        "https://d9222cfae9dab9f3d2229e8e8fa64e64a29d25ec-2283.dstack-pha-prod9.phala.network/auth/login"
       ],
       "webOrigins": [
         "*"
