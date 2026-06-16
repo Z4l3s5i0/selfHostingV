@@ -10,3 +10,9 @@ datasources:
     type: yesoreyeram-infinity-datasource
     access: proxy
     url: http://immich-server:2283
+    jsonData:
+      # Tell the plugin to send a custom header name
+      httpHeaderName1: 'x-api-key'
+      secureJsonData:
+        # Safely inject the API key passed from your docker-compose file
+        httpHeaderValue1: '$IMMICH_API_KEY'

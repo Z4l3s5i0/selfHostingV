@@ -545,8 +545,8 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "Prometheus"
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "Infinity"
       },
       "fieldConfig": {
         "defaults": {
@@ -612,8 +612,8 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "Prometheus"
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "Infinity"
       },
       "fieldConfig": {
         "defaults": {
@@ -679,8 +679,8 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "Prometheus"
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "Infinity"
       },
       "fieldConfig": {
         "defaults": {
@@ -746,8 +746,8 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "Prometheus"
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "Infinity"
       },
       "fieldConfig": {
         "defaults": {
